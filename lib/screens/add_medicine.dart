@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:medicine_remainder/model/provider_list.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
 
 class AddMedicine extends StatefulWidget {
   const AddMedicine({super.key});
@@ -12,6 +13,10 @@ class AddMedicine extends StatefulWidget {
 class _AddMedicineState extends State<AddMedicine> {
   @override
   Widget build(BuildContext context) {
+    TextEditingController controllerName = TextEditingController();
+    TextEditingController controllerHour = TextEditingController();
+    TextEditingController controllerColor = TextEditingController();
+
     return Scaffold(
         appBar: AppBar(
           title: const Text('Our Medicine'),
@@ -26,30 +31,33 @@ class _AddMedicineState extends State<AddMedicine> {
                 mainAxisSize: MainAxisSize
                     .min, // Ajusta el tamaño del Column a su contenido
                 children: <Widget>[
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: controllerName,
+                    decoration: const InputDecoration(
                       labelText: 'Medicine Name',
                       icon: Icon(Icons.medication),
                       labelStyle: TextStyle(fontSize: 28),
                     ),
                   ),
                   const SizedBox(height: 16.0), // Espaciado entre TextField
-                  const Row(
+                  Row(
                     mainAxisSize: MainAxisSize
                         .min, // Ajusta el tamaño del Row a su contenido
                     children: <Widget>[
                       Expanded(
                         child: TextField(
-                          decoration: InputDecoration(
+                          controller: controllerHour,
+                          decoration: const InputDecoration(
                               labelText: 'Hour',
                               icon: Icon(Icons.timer),
                               labelStyle: TextStyle(fontSize: 28)),
                         ),
                       ),
-                      SizedBox(width: 16.0), // Espaciado entre TextField
+                      const SizedBox(width: 16.0), // Espaciado entre TextField
                       Expanded(
                         child: TextField(
-                          decoration: InputDecoration(
+                          controller: controllerColor,
+                          decoration: const InputDecoration(
                               labelText: 'Color',
                               icon: Icon(Icons.color_lens),
                               labelStyle: TextStyle(fontSize: 28)),
@@ -67,12 +75,26 @@ class _AddMedicineState extends State<AddMedicine> {
                           style: TextStyle(fontSize: 28),
                         ),
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('¡Successfuly Added Medicine!'),
-                            duration:
-                                Duration(seconds: 2), // Duración del SnackBar
-                          ));
-                          Navigator.pop(context);
+                          if (controllerName.text.isEmpty ||
+                              controllerHour.text.isEmpty ||
+                              controllerColor.text.isEmpty) {
+                            IconSnackBar.show(context,
+                                snackBarType: SnackBarType.fail,
+                                label: '¡Please fill all fields!');
+                          } else {
+                            Provider.of<TextProvider>(context, listen: false)
+                                .addText(controllerName.text,
+                                    controllerHour.text, controllerColor.text);
+                            controllerName.clear();
+                            controllerHour.clear();
+                            controllerColor.clear();
+                            IconSnackBar.show(
+                                duration: const Duration(seconds: 2),
+                                context,
+                                snackBarType: SnackBarType.success,
+                                label: '¡Successfuly Added Medicine!');
+                            Navigator.pop(context);
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(280, 80),
